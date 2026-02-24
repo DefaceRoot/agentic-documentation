@@ -11,6 +11,7 @@ on:
         description: "Shell commands to run the Opencode harness to update docs/ (leave blank to use default 'opencode docs sync')"
         required: false
         default: ""
+      endpoint:
         description: "Opencode/OpenAI-compatible base URL"
         required: true
         default: "https://api.z.ai/api/coding/paas/v4"
