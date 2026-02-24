@@ -116,20 +116,34 @@ jobs:
           INPUT_RUN_SCRIPT: ${{ inputs.run_script }}
         run: |
           set -euo pipefail
-          # Export common env expected by most OpenAI-compatible harnesses
+          export PATH="$HOME/.opencode/bin:$PATH"
           export OPENAI_API_KEY="${OPENCODE_API_KEY}"
           export OPENAI_BASE_URL="${OPENCODE_ENDPOINT}"
           export MODEL="${OPENCODE_MODEL}"
-          # Execute provided harness commands (or default to opencode CLI)
           if [[ -n "${INPUT_RUN_SCRIPT}" ]]; then
             eval "${INPUT_RUN_SCRIPT}"
           else
-            if ! command -v opencode >/dev/null 2>&1; then
-              echo "opencode CLI not found. Provide 'inputs.install_script' or set 'inputs.run_script'." >&2
-              exit 1
-            fi
-            opencode --version
-            echo "Default run: no run_script provided; install verified. To perform docs sync, set inputs.run_script with your opencode command"
+            # Default: fetch prompt from hub and run doc sync
+            command -v opencode >/dev/null 2>&1 || { echo "opencode not found" >&2; exit 1; }
+            # Write provider config so opencode uses the custom endpoint
+            mkdir -p "${HOME}/.config/opencode"
+            cat > "${HOME}/.config/opencode/config.json" << EOFCFG
+            {
+              "providers": {
+                "openai": {
+                  "apiKey": "${OPENCODE_API_KEY}",
+                  "baseURL": "${OPENCODE_ENDPOINT}"
+                }
+              },
+              "model": "openai/${OPENCODE_MODEL}"
+            }
+          EOFCFG
+            # Fetch prompt from hub repo
+            PROMPT=$(curl -fsSL \
+              "https://raw.githubusercontent.com/DefaceRoot/agentic-documentation/main/.github/workflows/doc-sync-prompt.md")
+            [[ -z "${PROMPT}" ]] && { echo "Failed to fetch prompt from hub repo" >&2; exit 1; }
+            # Run opencode with the doc-sync prompt
+            opencode run --model "openai/${OPENCODE_MODEL}" "${PROMPT}"
           fi
 
       - name: Update docs last updated SHA
