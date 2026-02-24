@@ -8,9 +8,9 @@ on:
         required: false
         default: ""
       run_script:
-        description: "Shell commands to run the Opencode harness to update docs/"
-        required: true
-      endpoint:
+        description: "Shell commands to run the Opencode harness to update docs/ (leave blank to use default 'opencode docs sync')"
+        required: false
+        default: ""
         description: "Opencode/OpenAI-compatible base URL"
         required: true
         default: "https://api.z.ai/api/coding/paas/v4"
@@ -37,8 +37,9 @@ on:
         type: string
         default: ""
       run_script:
-        required: true
+        required: false
         type: string
+        default: ""
       endpoint:
         required: true
         type: string
@@ -100,8 +101,18 @@ jobs:
           export OPENAI_API_KEY="${OPENCODE_API_KEY}"
           export OPENAI_BASE_URL="${OPENCODE_ENDPOINT}"
           export MODEL="${OPENCODE_MODEL}"
-          # Execute provided harness commands
-          eval "${INPUT_RUN_SCRIPT}"
+          # Execute provided harness commands (or default to opencode CLI)
+          if [[ -n "${INPUT_RUN_SCRIPT}" ]]; then
+            eval "${INPUT_RUN_SCRIPT}"
+          else
+            if ! command -v opencode >/dev/null 2>&1; then
+              echo "opencode CLI not found. Provide 'inputs.install_script' or set 'inputs.run_script'." >&2
+              exit 1
+            fi
+            opencode --version || true
+            # Try common subcommands; override by setting inputs.run_script if different
+            opencode docs sync || opencode sync-docs || opencode docs-sync
+          fi
 
       - name: Update docs last updated SHA
         shell: bash
