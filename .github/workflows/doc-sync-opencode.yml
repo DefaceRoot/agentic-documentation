@@ -135,8 +135,10 @@ jobs:
                 "https://raw.githubusercontent.com/DefaceRoot/agentic-documentation/main/.github/workflows/doc-sync-prompt.md")
             fi
             [[ -z "${PROMPT}" ]] && { echo "Failed to fetch prompt from hub repo" >&2; exit 1; }
-            # Run opencode with the doc-sync prompt
-            opencode run --model "openai/${OPENCODE_MODEL}" "${PROMPT}"
+            # Set OPENAI_MODEL so the provider sends the right model in the request body
+            export OPENAI_MODEL="${OPENCODE_MODEL}"
+            # Run opencode non-interactively with the doc-sync prompt
+            opencode -p "${PROMPT}"
           fi
 
       - name: Update docs last updated SHA
