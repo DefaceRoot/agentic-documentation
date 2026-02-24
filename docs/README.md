@@ -24,15 +24,27 @@
 ```text
 .
 ├── .github/
-│   ├── docs-last-updated-sha
+│   ├── aw/
+│   │   └── actions-lock.json
 │   └── workflows/
-│       ├── doc-sync-opencode.yml   ← reusable workflow (hub)
-│       └── doc-sync-prompt.md      ← agent instructions
-├── docs/                           ← this directory
+│       ├── doc-sync.md              ← gh-aw source prompt (alternative)
+│       ├── doc-sync.lock.yml        ← gh-aw compiled workflow
+│       ├── doc-sync-opencode.yml    ← reusable workflow (hub)
+│       └── doc-sync-prompt.md       ← agent instructions
+├── docs/
+│   ├── README.md
+│   ├── api.md
+│   ├── architecture.md
+│   ├── contributing.md
+│   ├── deployment.md
+│   ├── development.md
+│   ├── plans/
+│   └── security.md
 ├── scripts/
-│   └── bootstrap.sh                ← deploy to all repos
+│   └── bootstrap.sh                 ← deploy to all repos
 ├── templates/
 │   └── caller/
-│       └── doc-sync-caller.yml     ← stamp into target repos
+│       └── doc-sync-caller.yml      ← stamp into target repos
+├── opencode.json                    ← Z.AI provider config
 └── README.md
 ```
