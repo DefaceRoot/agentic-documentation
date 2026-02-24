@@ -9,6 +9,8 @@ engine:
     - -c
     - 'model_provider="zai"'
     - -c
+    - 'model_providers.zai.name="Z.AI"'
+    - -c
     - 'model_providers.zai.base_url="https://api.z.ai/api/coding/paas/v4"'
     - -c
     - 'model_providers.zai.env_key="OPENAI_API_KEY"'
