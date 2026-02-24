@@ -70,7 +70,7 @@ for REPO in $REPOS; do
 
   # Create branch and PR
   git checkout -b "$BRANCH_NAME"
-  git add "$CALLER_DEST"
+  git add -f "$CALLER_DEST"
   git commit -m "chore: add automated doc-sync agentic workflow"
 
   # Push and open PR (handle protected branches gracefully)
