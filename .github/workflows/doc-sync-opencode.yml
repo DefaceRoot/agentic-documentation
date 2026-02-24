@@ -87,8 +87,8 @@ jobs:
           if [[ -n "${INPUT_INSTALL_SCRIPT}" ]]; then
             eval "${INPUT_INSTALL_SCRIPT}"
           else
-            if curl -fsSL https://raw.githubusercontent.com/opencode-ai/opencode/refs/heads/main/install | bash; then
-              echo "Installed opencode via install script"
+            if curl -fsSL https://opencode.ai/install | bash; then
+              echo "Installed opencode via opencode.ai install script"
             else
               echo "install script failed, trying npm"
               if npm i -g @opencode/cli; then
@@ -98,6 +98,7 @@ jobs:
                 go install github.com/opencode-ai/opencode@latest || { echo "All install methods failed" >&2; exit 1; }
                 echo "Installed opencode via go install"
               fi
+            fi
             fi
           fi
           # Ensure opencode is available in this shell after install
@@ -138,7 +139,7 @@ jobs:
             # Set OPENAI_MODEL so the provider sends the right model in the request body
             export OPENAI_MODEL="${OPENCODE_MODEL}"
             # Run opencode non-interactively with the doc-sync prompt
-            opencode -p "${PROMPT}"
+            opencode run --model "openai/${OPENCODE_MODEL}" "${PROMPT}"
           fi
 
       - name: Update docs last updated SHA
