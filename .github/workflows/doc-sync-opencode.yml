@@ -100,6 +100,9 @@ jobs:
               fi
             fi
           fi
+          # Ensure opencode is available in this shell after install
+          export PATH="$HOME/.opencode/bin:$PATH"
+          hash -r || true
           command -v opencode >/dev/null 2>&1 || { echo "opencode not found on PATH after installation" >&2; exit 1; }
           opencode --version || true
         env:
