@@ -1,8 +1,10 @@
 ---
 name: doc-sync
 engine:
-  id: copilot
-  model: gemini-3-flash
+  id: codex
+  model: glm-5
+  env:
+    OPENAI_BASE_URL: https://api.z.ai/api/coding/paas/v4
 strict: false
 permissions:
   contents: read
