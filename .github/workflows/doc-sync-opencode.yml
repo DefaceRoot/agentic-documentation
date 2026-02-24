@@ -140,7 +140,15 @@ jobs:
             printf '{"$schema":"https://opencode.ai/config.json","permission":"allow","provider":{"zai":{"name":"Z.AI","api":"%s","env":["OPENAI_API_KEY"],"models":{"%s":{"name":"Z.AI GLM","tool_call":true,"limit":{"context":128000,"output":8192}}}}}}' \
               "${OPENCODE_ENDPOINT}" "${OPENCODE_MODEL}" > opencode.json
             # Run opencode with the Z.AI custom provider
-            opencode run --model "zai/${OPENCODE_MODEL}" "${PROMPT}"
+            # Run opencode; capture output so we can detect silent auth errors
+            OPENCODE_LOGFILE=$(mktemp)
+            opencode run --model "zai/${OPENCODE_MODEL}" "${PROMPT}" 2>&1 | tee "${OPENCODE_LOGFILE}" || OPENCODE_EXIT=$?
+            if grep -qiE 'token expired|incorrect|ProviderModelNotFound|authentication|Unauthorized' "${OPENCODE_LOGFILE}"; then
+              echo '::error::opencode authentication failed — rotate the OPENCODE_API_KEY secret'
+              exit 1
+            fi
+            rm -f "${OPENCODE_LOGFILE}"
+            [[ ${OPENCODE_EXIT:-0} -ne 0 ]] && exit "${OPENCODE_EXIT}"
           fi
 
       - name: Update docs last updated SHA
@@ -150,7 +158,20 @@ jobs:
           mkdir -p .github
           echo "${GITHUB_SHA}" > .github/docs-last-updated-sha
 
+
+      - name: Check for doc changes
+        id: check-docs
+        shell: bash
+        run: |
+          if [[ -z "$(git status --short -- docs/)" ]]; then
+            echo 'changed=false' >> "${GITHUB_OUTPUT}"
+            echo 'No docs/ changes — skipping PR'
+          else
+            echo 'changed=true' >> "${GITHUB_OUTPUT}"
+          fi
+
       - name: Create Pull Request with doc changes
+        if: steps.check-docs.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GH_AW_AGENT_TOKEN || secrets.GITHUB_TOKEN }}
