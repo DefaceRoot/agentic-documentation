@@ -142,13 +142,12 @@ jobs:
             # Run opencode with the Z.AI custom provider
             # Run opencode; capture output so we can detect silent auth errors
             OPENCODE_LOGFILE=$(mktemp)
-            opencode run --model "zai/${OPENCODE_MODEL}" "${PROMPT}" 2>&1 | tee "${OPENCODE_LOGFILE}" || OPENCODE_EXIT=$?
+            opencode run --model "zai/${OPENCODE_MODEL}" "${PROMPT}" 2>&1 | tee "${OPENCODE_LOGFILE}" || true
             if grep -qiE '^Error: (token expired|model not found|unauthorized)|^ProviderModelNotFoundError' "${OPENCODE_LOGFILE}"; then
               echo '::error::opencode authentication failed — rotate the OPENCODE_API_KEY secret'
               exit 1
             fi
             rm -f "${OPENCODE_LOGFILE}"
-            [[ ${OPENCODE_EXIT:-0} -ne 0 ]] && exit "${OPENCODE_EXIT}"
           fi
 
       - name: Update docs last updated SHA
