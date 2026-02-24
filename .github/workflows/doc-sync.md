@@ -13,7 +13,7 @@ engine:
     - -c
     - 'model_providers.zai.base_url="https://api.z.ai/api/coding/paas/v4"'
     - -c
-    - 'model_providers.zai.env_key="OPENAI_API_KEY"'
+    - 'model_providers.zai.env_key="CODEX_API_KEY"'
     - -c
     - 'model_providers.zai.wire_api="responses"'
 network:
