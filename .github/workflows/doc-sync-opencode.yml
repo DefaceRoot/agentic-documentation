@@ -99,7 +99,6 @@ jobs:
                 echo "Installed opencode via go install"
               fi
             fi
-            fi
           fi
           # Ensure opencode is available in this shell after install
           export PATH="$HOME/.opencode/bin:$PATH"
