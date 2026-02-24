@@ -135,10 +135,12 @@ jobs:
                 "https://raw.githubusercontent.com/DefaceRoot/agentic-documentation/main/.github/workflows/doc-sync-prompt.md")
             fi
             [[ -z "${PROMPT}" ]] && { echo "Failed to fetch prompt from hub repo" >&2; exit 1; }
-            # Set OPENAI_MODEL so the provider sends the right model in the request body
-            export OPENAI_MODEL="${OPENCODE_MODEL}"
-            # Run opencode non-interactively with the doc-sync prompt
-            opencode run --model "openai/${OPENCODE_MODEL}" "${PROMPT}"
+            # Write workspace opencode.json with Z.AI custom provider config
+            export OPENAI_API_KEY="${OPENCODE_API_KEY}"
+            printf '{"$schema":"https://opencode.ai/config.json","permission":"allow","provider":{"zai":{"name":"Z.AI","api":"%s","env":["OPENAI_API_KEY"],"models":{"%s":{"name":"Z.AI GLM","tool_call":true,"limit":{"context":128000,"output":8192}}}}}}' \
+              "${OPENCODE_ENDPOINT}" "${OPENCODE_MODEL}" > opencode.json
+            # Run opencode with the Z.AI custom provider
+            opencode run --model "zai/${OPENCODE_MODEL}" "${PROMPT}"
           fi
 
       - name: Update docs last updated SHA
