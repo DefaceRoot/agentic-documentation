@@ -110,7 +110,7 @@ jobs:
       - name: Run Opencode harness
         shell: bash
         env:
-          OPENCODE_API_KEY: ${{ secrets.api_key || secrets.OPENCODE_API_KEY }}
+          OPENCODE_API_KEY: ${{ secrets.api_key || secrets.OPENCODE_API_KEY || secrets.OPENAI_API_KEY }}
           OPENCODE_ENDPOINT: ${{ inputs.endpoint }}
           OPENCODE_MODEL: ${{ inputs.model }}
           INPUT_RUN_SCRIPT: ${{ inputs.run_script }}
