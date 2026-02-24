@@ -143,7 +143,7 @@ jobs:
             # Run opencode; capture output so we can detect silent auth errors
             OPENCODE_LOGFILE=$(mktemp)
             opencode run --model "zai/${OPENCODE_MODEL}" "${PROMPT}" 2>&1 | tee "${OPENCODE_LOGFILE}" || OPENCODE_EXIT=$?
-            if grep -qiE 'token expired|incorrect|ProviderModelNotFound|authentication|Unauthorized' "${OPENCODE_LOGFILE}"; then
+            if grep -qiE '^Error: (token expired|model not found|unauthorized)|^ProviderModelNotFoundError' "${OPENCODE_LOGFILE}"; then
               echo '::error::opencode authentication failed — rotate the OPENCODE_API_KEY secret'
               exit 1
             fi
