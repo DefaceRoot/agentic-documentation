@@ -5,22 +5,6 @@ engine:
   model: glm-5
   env:
     OPENAI_BASE_URL: https://api.z.ai/api/coding/paas/v4
-  args:
-    - -c
-    - 'model_provider="zai"'
-    - -c
-    - 'model_providers.zai.name="Z.AI"'
-    - -c
-    - 'model_providers.zai.base_url="https://api.z.ai/api/coding/paas/v4"'
-    - -c
-    - 'model_providers.zai.env_key="CODEX_API_KEY"'
-    - -c
-    - 'model_providers.zai.wire_api="responses"'
-network:
-  allowed:
-    - defaults
-    - node
-    - api.z.ai
 strict: false
 permissions:
   contents: read
