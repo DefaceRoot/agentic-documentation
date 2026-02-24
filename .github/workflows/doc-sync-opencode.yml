@@ -1,0 +1,122 @@
+name: doc-sync-opencode
+
+on:
+  workflow_dispatch:
+    inputs:
+      install_script:
+        description: "Shell commands to install the Opencode harness CLI (optional)"
+        required: false
+        default: ""
+      run_script:
+        description: "Shell commands to run the Opencode harness to update docs/"
+        required: true
+      endpoint:
+        description: "Opencode/OpenAI-compatible base URL"
+        required: true
+        default: "https://api.z.ai/api/coding/paas/v4"
+      model:
+        description: "Model identifier used by the harness"
+        required: true
+        default: "glm-5"
+      branch:
+        description: "Branch name for the docs sync PR"
+        required: false
+        default: "docs/opencode-sync"
+      pr_title:
+        description: "Pull Request title"
+        required: false
+        default: "docs: automated sync — opencode harness"
+      pr_body:
+        description: "Pull Request body"
+        required: false
+        default: "Automated doc sync using Opencode harness"
+  workflow_call:
+    inputs:
+      install_script:
+        required: false
+        type: string
+        default: ""
+      run_script:
+        required: true
+        type: string
+      endpoint:
+        required: true
+        type: string
+        default: "https://api.z.ai/api/coding/paas/v4"
+      model:
+        required: true
+        type: string
+        default: "glm-5"
+      branch:
+        required: false
+        type: string
+        default: "docs/opencode-sync"
+      pr_title:
+        required: false
+        type: string
+        default: "docs: automated sync — opencode harness"
+      pr_body:
+        required: false
+        type: string
+        default: "Automated doc sync using Opencode harness"
+    secrets:
+      api_key:
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+
+jobs:
+  docsync:
+    name: Run Opencode harness and open PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Opencode harness CLI (optional)
+        if: ${{ inputs.install_script != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ${INPUT_INSTALL_SCRIPT}
+        env:
+          INPUT_INSTALL_SCRIPT: ${{ inputs.install_script }}
+
+      - name: Run Opencode harness
+        shell: bash
+        env:
+          OPENCODE_API_KEY: ${{ secrets.api_key || secrets.OPENCODE_API_KEY }}
+          OPENCODE_ENDPOINT: ${{ inputs.endpoint }}
+          OPENCODE_MODEL: ${{ inputs.model }}
+          INPUT_RUN_SCRIPT: ${{ inputs.run_script }}
+        run: |
+          set -euo pipefail
+          # Export common env expected by most OpenAI-compatible harnesses
+          export OPENAI_API_KEY="${OPENCODE_API_KEY}"
+          export OPENAI_BASE_URL="${OPENCODE_ENDPOINT}"
+          export MODEL="${OPENCODE_MODEL}"
+          # Execute provided harness commands
+          eval "${INPUT_RUN_SCRIPT}"
+
+      - name: Update docs last updated SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .github
+          echo "${GITHUB_SHA}" > .github/docs-last-updated-sha
+
+      - name: Create Pull Request with doc changes
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: ${{ inputs.branch }}
+          title: ${{ inputs.pr_title }}
+          body: ${{ inputs.pr_body }}
+          commit-message: ${{ inputs.pr_title }}
+          add-paths: |
+            docs/**
+            .github/docs-last-updated-sha
