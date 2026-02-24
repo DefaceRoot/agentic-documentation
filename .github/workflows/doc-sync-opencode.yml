@@ -114,6 +114,7 @@ jobs:
           OPENCODE_ENDPOINT: ${{ inputs.endpoint }}
           OPENCODE_MODEL: ${{ inputs.model }}
           INPUT_RUN_SCRIPT: ${{ inputs.run_script }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           export PATH="$HOME/.opencode/bin:$PATH"
@@ -125,10 +126,14 @@ jobs:
           else
             # Default: fetch prompt from hub and run doc sync
             command -v opencode >/dev/null 2>&1 || { echo "opencode not found" >&2; exit 1; }
-            # Env vars OPENAI_API_KEY and OPENAI_BASE_URL are already exported above;
-            # Fetch prompt from hub repo
-            PROMPT=$(curl -fsSL \
-              "https://raw.githubusercontent.com/DefaceRoot/agentic-documentation/main/.github/workflows/doc-sync-prompt.md")
+            # Prompt file: use local checkout when on hub repo, else fetch authenticated
+            if [[ -f ".github/workflows/doc-sync-prompt.md" ]]; then
+              PROMPT=$(cat ".github/workflows/doc-sync-prompt.md")
+            else
+              PROMPT=$(curl -fsSL \
+                -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+                "https://raw.githubusercontent.com/DefaceRoot/agentic-documentation/main/.github/workflows/doc-sync-prompt.md")
+            fi
             [[ -z "${PROMPT}" ]] && { echo "Failed to fetch prompt from hub repo" >&2; exit 1; }
             # Run opencode with the doc-sync prompt
             opencode run --model "openai/${OPENCODE_MODEL}" "${PROMPT}"
