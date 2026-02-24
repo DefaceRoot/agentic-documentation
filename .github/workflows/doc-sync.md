@@ -13,7 +13,7 @@ engine:
     - -c
     - 'model_providers.zai.env_key="OPENAI_API_KEY"'
     - -c
-    - 'model_providers.zai.wire_api="chat"'
+    - 'model_providers.zai.wire_api="responses"'
 network:
   allowed:
     - defaults
