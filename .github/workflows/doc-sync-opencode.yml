@@ -63,7 +63,7 @@ on:
         default: "Automated doc sync using Opencode harness"
     secrets:
       api_key:
-        required: true
+        required: false
 
 permissions:
   contents: write
@@ -125,19 +125,7 @@ jobs:
           else
             # Default: fetch prompt from hub and run doc sync
             command -v opencode >/dev/null 2>&1 || { echo "opencode not found" >&2; exit 1; }
-            # Write provider config so opencode uses the custom endpoint
-            mkdir -p "${HOME}/.config/opencode"
-            cat > "${HOME}/.config/opencode/config.json" << EOFCFG
-            {
-              "providers": {
-                "openai": {
-                  "apiKey": "${OPENCODE_API_KEY}",
-                  "baseURL": "${OPENCODE_ENDPOINT}"
-                }
-              },
-              "model": "openai/${OPENCODE_MODEL}"
-            }
-          EOFCFG
+            # Env vars OPENAI_API_KEY and OPENAI_BASE_URL are already exported above;
             # Fetch prompt from hub repo
             PROMPT=$(curl -fsSL \
               "https://raw.githubusercontent.com/DefaceRoot/agentic-documentation/main/.github/workflows/doc-sync-prompt.md")
