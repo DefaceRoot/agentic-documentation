@@ -1,8 +1,8 @@
 ---
 name: doc-sync
 engine:
-  id: claude
-  model: claude-sonnet-4-5
+  id: copilot
+  model: gemini-3-flash
 strict: false
 permissions:
   contents: read
