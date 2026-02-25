@@ -11,6 +11,10 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
+concurrency:
+  group: doc-sync-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
   pull-requests: write
