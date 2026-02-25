@@ -42,11 +42,11 @@ on:
         type: string
         default: ""
       endpoint:
-        required: true
+        required: false
         type: string
         default: "https://api.z.ai/api/coding/paas/v4"
       model:
-        required: true
+        required: false
         type: string
         default: "glm-5"
       branch:
