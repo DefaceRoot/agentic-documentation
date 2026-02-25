@@ -74,6 +74,7 @@ on:
 jobs:
   docsync:
     name: Run Opencode harness and open PR
+    if: ${{ github.event_name != 'pull_request' || github.head_ref != inputs.branch }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
