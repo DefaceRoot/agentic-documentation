@@ -71,11 +71,6 @@ on:
       GH_AW_AGENT_TOKEN:
         required: false
 
-permissions:
-  contents: write
-  pull-requests: write
-  actions: read
-
 jobs:
   docsync:
     name: Run Opencode harness and open PR

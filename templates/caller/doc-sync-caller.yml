@@ -11,6 +11,10 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   doc-sync:
     uses: DefaceRoot/agentic-documentation/.github/workflows/doc-sync-opencode.yml@main
