@@ -191,6 +191,7 @@ jobs:
         with:
           token: ${{ secrets.GH_AW_AGENT_TOKEN || secrets.GITHUB_TOKEN }}
           branch: ${{ inputs.branch }}
+          base: ${{ github.event.repository.default_branch }}
           title: ${{ inputs.pr_title }}
           body: ${{ inputs.pr_body }}
           commit-message: ${{ inputs.pr_title }}
