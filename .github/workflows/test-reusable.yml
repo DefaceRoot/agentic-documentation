@@ -4,8 +4,6 @@ on:
 jobs:
   hello:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
-      - run: echo "permissions in job not workflow level"
+      - uses: actions/checkout@v4
+      - run: echo "no permissions in reusable workflow"
