@@ -119,6 +119,10 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$HOME/.opencode/bin:$PATH"
+          if [[ -z "${OPENCODE_API_KEY:-}" ]]; then
+            echo '::error::Missing OPENCODE_API_KEY (or api_key/OPENAI_API_KEY) secret in the caller repository'
+            exit 1
+          fi
           export OPENAI_API_KEY="${OPENCODE_API_KEY}"
           export OPENAI_BASE_URL="${OPENCODE_ENDPOINT}"
           export MODEL="${OPENCODE_MODEL}"
@@ -143,10 +147,19 @@ jobs:
             # Run opencode with the Z.AI custom provider
             # Run opencode; capture output so we can detect silent auth errors
             OPENCODE_LOGFILE=$(mktemp)
-            opencode run --model "zai/${OPENCODE_MODEL}" "${PROMPT}" 2>&1 | tee "${OPENCODE_LOGFILE}" || true
-            if grep -qiE '^Error: (token expired|model not found|unauthorized)|^ProviderModelNotFoundError' "${OPENCODE_LOGFILE}"; then
-              echo '::error::opencode authentication failed — rotate the OPENCODE_API_KEY secret'
+            set +e
+            opencode run --model "zai/${OPENCODE_MODEL}" "${PROMPT}" 2>&1 | tee "${OPENCODE_LOGFILE}"
+            OPENCODE_EXIT=${PIPESTATUS[0]}
+            set -e
+            if grep -qiE '^Error: (token expired|model not found|unauthorized)|^ProviderModelNotFoundError|Authentication parameter not received in Header|unable to authenticate|authentication failed' "${OPENCODE_LOGFILE}"; then
+              echo '::error::opencode authentication failed — set/rotate the OPENCODE_API_KEY secret in the caller repository'
+              rm -f "${OPENCODE_LOGFILE}"
               exit 1
+            fi
+            if [[ ${OPENCODE_EXIT} -ne 0 ]]; then
+              echo "::error::opencode run failed with exit code ${OPENCODE_EXIT}"
+              rm -f "${OPENCODE_LOGFILE}"
+              exit "${OPENCODE_EXIT}"
             fi
             rm -f "${OPENCODE_LOGFILE}"
           fi
