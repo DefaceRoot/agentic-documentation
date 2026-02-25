@@ -64,6 +64,12 @@ on:
     secrets:
       api_key:
         required: false
+      OPENCODE_API_KEY:
+        required: false
+      OPENAI_API_KEY:
+        required: false
+      GH_AW_AGENT_TOKEN:
+        required: false
 
 permissions:
   contents: write
