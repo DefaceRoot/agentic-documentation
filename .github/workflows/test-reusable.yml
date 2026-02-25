@@ -1,8 +1,16 @@
 name: test-reusable
 on:
   workflow_call:
+    secrets:
+      OPENCODE_API_KEY:
+        required: false
+      GH_AW_AGENT_TOKEN:
+        required: false
+permissions:
+  contents: write
+  pull-requests: write
 jobs:
   hello:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "cross-repo reusable workflow works"
+      - run: echo "reusable workflow with permissions and secrets works"
